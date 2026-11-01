@@ -106,7 +106,7 @@ def generate(rng, depth, names):
 
 def main():
     if platform.system() != "Linux" or platform.machine() != "x86_64":
-        raise RuntimeError("native differential tests require an x86-64 Linux host")
+        raise RuntimeError("native differential tests require an x86_64 Linux host")
     try:
         execute(bytes.fromhex('0f 0b'),[(0,0,0)])
     except RuntimeError as error:
@@ -178,7 +178,7 @@ def main():
             binary.write_bytes(b"preserve")
             result = subprocess.run([ROOT / ".build/remy", path, binary], capture_output=True, timeout=30)
             assert result.returncode != 0 and binary.read_bytes() == b"preserve", bad
-    print(f"{len(cases)} programs, {comparisons} native comparisons, HOL reference checks and 11 rejection cases passed")
+    print(f"{len(cases)} programs, {comparisons} native comparisons, byte interpreter and HOL reference checks, 11 rejection cases passed")
 
 
 if __name__ == "__main__":

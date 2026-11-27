@@ -15,6 +15,7 @@ check: all
 	python3 tests/native.py
 	python3 tests/cli.py
 	python3 tests/live.py
+	python3 tests/silicon.py
 
 measure: all
 	python3 tests/measure.py

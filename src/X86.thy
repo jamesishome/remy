@@ -151,7 +151,7 @@ definition decode64 :: "nat list \<Rightarrow> (micro \<times> nat list) option"
       if 5 \<le> length bs \<and> n < 128 \<and> n mod 8 = 0 then Some (Load (n div 8),drop 5 bs) else None
     else if take 4 bs = [72,139,132,36] then
       let n = integer (take 4 (drop 4 bs)) in
-      if 8 \<le> length bs \<and> n mod 8 = 0 \<and> n div 8 < 2 ^ 28
+      if 8 \<le> length bs \<and> n mod 8 = 0 \<and> 16 \<le> n div 8 \<and> n div 8 < 2 ^ 28
       then Some (Load (n div 8),drop 8 bs) else None
     else map_option (\<lambda>i. (i,drop (length (microbytes i)) bs))
       (List.find (\<lambda>i. take (length (microbytes i)) bs = microbytes i) fixed64))"
@@ -323,10 +323,10 @@ proof -
   then show ?thesis using q by auto
 qed
 
-function simulate64 :: "nat \<Rightarrow> nat list \<Rightarrow> processor \<Rightarrow> processor option" where
+function simulate64 :: "nat \<Rightarrow> nat list \<Rightarrow> processor \<Rightarrow> (pixel \<times> processor) option" where
   "simulate64 0 bytes c = None"
 | "simulate64 (Suc fuel) bytes c = (if bytes = [] then None else
-    if bytes = [195] then map_option snd (ret64 c) else
+    if bytes = [195] then ret64 c else
     if take 1 bytes = [233] then let n = integer (take 4 (drop 1 bytes)) in
       if 5 \<le> length bytes \<and> n < 2 ^ 31 \<and> n \<le> length bytes - 5
       then simulate64 fuel (drop (5+n) bytes) c else None

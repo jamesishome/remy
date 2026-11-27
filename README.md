@@ -62,3 +62,11 @@ The [encoder](src/core/Encoding.thy) proves inversion and byte bounds for immedi
 | `rcx`, `rbx` | Scratch |
 
 ![Source eval](media/correspondence.svg)
+
+## Silicon
+
+The executable interpreter is proved sound against the inductive x86 semantics, so anything `simulate64` returns is a genuine `returns64` run with the popped return address included. On top of that 50040 random machine states and programs with edge immediates, long and short loads, misaligned jumps and raw garbage bytes go through the model, and the 16325 it accepts run on the real CPU, which has to agree on every register, the stack pointer, the stack contents and every flag the model claims to know
+
+```sh
+python3 tests/silicon.py
+```

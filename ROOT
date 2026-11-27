@@ -21,4 +21,5 @@ session Remy in src = Remybase +
     Frontend
     Delivery
     Examples
+    Silicon
     Export

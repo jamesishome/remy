@@ -68,6 +68,8 @@ fun main () =
       (case Remy.vectors (read source) of (true, bytes) => write destination bytes | result => output result)
   | ["package", revision, source, destination] =>
       emit destination (Remy.delivery (chars revision) (read source))
+  | ["replay", source, destination] =>
+      (case Remy.replay (read source) of (true, bytes) => write destination bytes | result => output result)
   | ["eval", source, x, y, t] => output (Remy.reference (read source) (chars x) (chars y) (chars t))
   | ["simulate", binary, x, y, t] => output (Remy.simulate (read binary) (chars x) (chars y) (chars t))
   | ["limits", depth, nodes, stack, source, destination] =>
@@ -76,7 +78,7 @@ fun main () =
   | ["disassemble", binary] => output (Remy.disassemble (read binary))
   | ["baseline", source, destination] => emit destination (Remy.baseline (read source))
   | [source, destination] => emit destination (Remy.artifact (read source))
-  | _ => raise Fail "usage: remy check binary | remy disassemble binary | remy simulate binary x y t | remy package revision source packet | remy baseline source binary | remy limits depth nodes stack source binary | remy source binary | remy vectors source data | remy eval source x y t (source - reads standard input)")
+  | _ => raise Fail "usage: remy check binary | remy disassemble binary | remy simulate binary x y t | remy package revision source packet | remy baseline source binary | remy limits depth nodes stack source binary | remy source binary | remy vectors source data | remy replay cases results | remy eval source x y t (source - reads standard input)")
   handle exn =>
     (TextIO.output (TextIO.stdErr, "remy: " ^ General.exnMessage exn ^ "\n");
      OS.Process.exit OS.Process.failure);

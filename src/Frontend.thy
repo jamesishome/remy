@@ -357,7 +357,7 @@ definition simulate :: "string \<Rightarrow> string \<Rightarrow> string \<Right
     case (number x,number y,number t) of (Some a,Some b,Some c) \<Rightarrow>
       (case simulate64 (Suc (length code)) (map nat_of_char code) (initial64 a b c) of
         None \<Rightarrow> (False,''unsupported or incomplete x86 execution'' @ newline)
-        | Some q \<Rightarrow> if stack (state64 q) = []
+        | Some (_,q) \<Rightarrow> if stack (state64 q) = []
           then (True,decimal (unat (registers (state64 q) Rax)) @ newline)
           else (False,''return frame was not consumed'' @ newline))
     | _ \<Rightarrow> (False,''invalid input'' @ newline))"

@@ -23,3 +23,9 @@ session Remy in src = Remybase +
     Examples
     Silicon
     Export
+
+session Holy in "src/holy" = Remy +
+  options [document = false]
+  theories
+    HolyC
+    Guest

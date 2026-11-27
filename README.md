@@ -70,3 +70,16 @@ The executable interpreter is proved sound against the inductive x86 semantics, 
 ```sh
 python3 tests/silicon.py
 ```
+
+## HolyC
+
+Isabelle now has a HolyC code generator target that lowers the whole verified compiler into 8000 lines of A normal HolyC with goto pattern matching, lifted lambdas, dictionary records and a tagged bignum runtime, so the compiler the proofs talk about runs natively inside TempleOS and produces the same bytes and diagnostics as the Poly/ML build
+
+```c
+#include "C:/Shade.HC";
+Shade("(xor x y)");
+```
+
+```sh
+make holy TEMPLE_ISO=/path/to/TempleOS.ISO
+```

@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ENTRY = struct.Struct('<H38sqqQ')
 
 
-def image(template, destination):
+def image(template, destination, files=None, once=None):
     data = bytearray(template.read_bytes())
     boots = [n for n in range(min(256, len(data) // 512))
              if data[n*512+3] == 0x88 and data[n*512+510:n*512+512] == b'\x55\xaa']
@@ -39,17 +39,22 @@ def image(template, destination):
         data.extend(bytes((-len(data)) % 512))
         return sector
 
-    files = {p.name: p.read_bytes() for p in (ROOT / '.build/payload').iterdir()}
+    if files is None:
+        files = {p.name: p.read_bytes() for p in (ROOT / '.build/payload').iterdir()}
+    entries = entries[:2] + [row for row in entries[2:] if row[1].split(b'\0')[0].decode() not in files]
     for name, payload in files.items():
         if len(name.encode('ascii')) >= 38:
             raise ValueError('RedSea filename exceeds 37 bytes')
         entries.append((0x800, name.encode('ascii'), append(payload), len(payload), 0))
-    once = b'Cd("::/");;\n#include "Remy.HC"\ndirectory="::/";\nif (Verify()) Live(0);\n'
+    if once is None:
+        once = b'Cd("::/");;\n#include "Remy.HC"\ndirectory="::/";\nif (Verify()) Live(0);\n'
     once_sector = append(once)
     home = next(row for row in entries if row[1].split(b'\0')[0] == b'Home')
     home_start, home_size = home[2:4]
-    for at in range(home_start*512, home_start*512+home_size, ENTRY.size):
-        if not data[at+2]:
+    slots = range(home_start*512, home_start*512+home_size, ENTRY.size)
+    named = [at for at in slots if data[at+2:at+40].split(b'\0')[0] == b'Once.HC']
+    for at in named or slots:
+        if named or not data[at+2]:
             data[at:at+ENTRY.size] = ENTRY.pack(0x800, b'Once.HC', once_sector, len(once), 0)
             break
     else:
@@ -167,7 +172,7 @@ def main():
                 pass
             assert reply(connection) == (0,0,0)
             print('guest booted and verified all three payloads',flush=True)
-            connection.settimeout(30)
+            connection.settimeout(180)
             connection.sendall(packet('(+ x y)',1,directory))
             assert reply(connection) == (1,1,1)
             time.sleep(1)

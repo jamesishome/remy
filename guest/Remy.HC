@@ -25,6 +25,7 @@ U32 synchronise=0,revision=0;
 I64 display_lock=0,reply_lock=0,transfer=0;
 CTask *receiver=NULL;
 Bool live_mode=FALSE;
+U8 *caption=NULL;
 F64 last_received;
 
 U0 Reply(U32 sequence,U32 status)
@@ -211,6 +212,7 @@ U0 Draw(CTask *,CDC *dc)
 {
     U8 *title="live";
     if (!live_mode) title=names[selected];
+    if (caption) title=caption;
     if (LBts(&display_lock,0)) return;
     try {
         dc->color=BLUE;
@@ -227,6 +229,7 @@ U0 Draw(CTask *,CDC *dc)
 U0 Release(Bool restore)
 {
     Fs->draw_it=NULL;
+    caption=NULL;
     if (receiver) {
         Kill(receiver);
         receiver=NULL;
@@ -244,7 +247,7 @@ U0 Release(Bool restore)
     LBtr(&display_lock,0);
 }
 
-U0 Show(I64 which=0,Bool live=FALSE)
+U0 Show(I64 which=0,Bool live=FALSE,U8 *code=NULL,U8 *source=NULL)
 {
     I64 x,y,dy,t=0,cpu=0,key;
     U8 color,path[64];
@@ -253,12 +256,17 @@ U0 Show(I64 which=0,Bool live=FALSE)
     try {
         selected=which;
         live_mode=live;
-        StrPrint(path,"%s%s.BIN",directory,names[which]);
-        shader=FileRead(path);
-        if (!shader) throw('Code');
-        StrPrint(path,"%s%s.TXT",directory,names[which]);
-        program=FileRead(path);
-        if (!program) throw('Source');
+        if (code) {
+            shader=code;
+            program=source;
+        } else {
+            StrPrint(path,"%s%s.BIN",directory,names[which]);
+            shader=FileRead(path);
+            if (!shader) throw('Code');
+            StrPrint(path,"%s%s.TXT",directory,names[which]);
+            program=FileRead(path);
+            if (!program) throw('Source');
+        }
         image=DCNew(480,336);
         if (live) {
             incoming=CAlloc(147484);
